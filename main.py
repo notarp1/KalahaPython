@@ -4,6 +4,8 @@ from functools import partial
 import json
 import numpy as np
 
+from node import node
+
 
 class Kalaha(object):
 
@@ -27,6 +29,9 @@ class Kalaha(object):
         return winner
 
     def evalmove(self, board, kugler, winner, limit, sum1, sum2):
+
+
+
         path = []
         path_complete = []
         path_list = []
@@ -45,17 +50,23 @@ class Kalaha(object):
         print("----------------------------------------------------------------")
         print("-----------------CANDIDATES PLAYER 1 ---------------------------")
         print("----------------------------------------------------------------")
+
+        firstNode = node(board, None)
+
         for p in candidates:
             print(p)
+            firstNode.appendChild(node(p[1], firstNode))
+
 
         path_list = []
 
-        for p in candidates:
+        for currentNode in firstNode.get_childen():
+
             path = []
             path_complete = []
 
             for i in range(8, 14):
-                boardPass = list(p[4])
+                boardPass = list(currentNode.get_boardstate(currentNode))
                 path_send = list(path_complete)
 
                 path_list.append(
@@ -70,37 +81,10 @@ class Kalaha(object):
             print("----------------------------------------------------------------")
             print("-----------------CANDIDATES PLAYER 2 ---------------------------")
             print("---------------------------------------------------------------")
+
             for x in sumcandidates:
                 print(x)
-
-        path_list = []
-        candidates_player1 = []
-        for p in candidates_player2:
-            for m in p:
-                path = []
-                path_complete = []
-
-                for i in range(1, 7):
-                    boardPass = list(m[4])
-                    path_send = list(path_complete)
-
-                    path_list.append(
-                        self.recursive(boardPass, kugler, i, limit, winner, path, path_send, sum1, sum2, 1, 7, i, 1))
-                while None in path_list:
-                    path_list.remove(None)
-
-                sum_candidates = []
-                self.getCandidates(sum_candidates, path_list)
-                candidates_player1.append(sum_candidates)
-
-                path_list = []
-
-        for p in candidates_player1:
-            print("----------------------------------------------------------------")
-            print("-----------------CANDIDATES PLAYER 1 ---------------------------")
-            print("----------------------------------------------------------------")
-            for m in p:
-                print(m)
+                currentNode.appendChild(node(currentNode, x[1]))
 
     def getCandidates(self, candidates, path_list):
         for p in path_list:
@@ -176,18 +160,18 @@ class Kalaha(object):
                         return path_complete
                     else:
                         if player1 == 1:
-                            path_complete.append((boardPass[7], path, limit, 0, boardPass, current))
+                            path_complete.append((boardPass[7], boardPass, 0, path))
                         else:
-                            path_complete.append((boardPass[0], path, limit, 0, boardPass, current))
+                            path_complete.append((boardPass[0], boardPass, 0, path))
 
                         while None in path_complete:
                             path_complete.remove(None)
                         return path_complete
                 else:
                     if player1 == 1:
-                        path_complete.append((boardPass[7], path, limit, 1, boardPass, current))
+                        path_complete.append((boardPass[7], boardPass, 1, path))
                     else:
-                        path_complete.append((boardPass[0], path, limit, 1, boardPass, current))
+                        path_complete.append((boardPass[0], boardPass, 1, path))
 
                     return path_complete
 
