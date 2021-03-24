@@ -2,7 +2,8 @@ import copy
 from operator import is_not
 from functools import partial
 import json
-import numpy as np
+
+import adjacency
 
 
 class Kalaha(object):
@@ -42,11 +43,6 @@ class Kalaha(object):
             path_list.remove(None)
 
         self.getCandidates(candidates, path_list)
-        print("----------------------------------------------------------------")
-        print("-----------------CANDIDATES PLAYER 1 ---------------------------")
-        print("----------------------------------------------------------------")
-        for p in candidates:
-            print(p)
 
         path_list = []
 
@@ -55,7 +51,7 @@ class Kalaha(object):
             path_complete = []
 
             for i in range(8, 14):
-                boardPass = list(p[4])
+                boardPass = list(p[1])
                 path_send = list(path_complete)
 
                 path_list.append(
@@ -67,11 +63,7 @@ class Kalaha(object):
             self.getCandidates(sumcandidates, path_list)
             candidates_player2.append(sumcandidates)
             path_list = []
-            print("----------------------------------------------------------------")
-            print("-----------------CANDIDATES PLAYER 2 ---------------------------")
-            print("---------------------------------------------------------------")
-            for x in sumcandidates:
-                print(x)
+
 
         path_list = []
         candidates_player1 = []
@@ -81,7 +73,7 @@ class Kalaha(object):
                 path_complete = []
 
                 for i in range(1, 7):
-                    boardPass = list(m[4])
+                    boardPass = list(m[1])
                     path_send = list(path_complete)
 
                     path_list.append(
@@ -95,12 +87,16 @@ class Kalaha(object):
 
                 path_list = []
 
-        for p in candidates_player1:
-            print("----------------------------------------------------------------")
-            print("-----------------CANDIDATES PLAYER 1 ---------------------------")
-            print("----------------------------------------------------------------")
-            for m in p:
-                print(m)
+        graph = adjacency.Graph()
+
+        for x in range(6):
+            graph.add_vertex(x)
+            for m in range(6 * x, 6 * x + 6):
+                graph.add_vertex(m)
+                graph.add_edge({x, m})
+
+        print(graph.edges())
+
 
     def getCandidates(self, candidates, path_list):
         for p in path_list:
@@ -161,7 +157,7 @@ class Kalaha(object):
             boardPass[new_selection + a] += 1
 
             if i == value:
-
+                #self.printBoard(boardPass)
                 if self.isWinner(boardPass, kugler, winner, sum1, sum2) == 0:
 
                     if new_selection == switch:
@@ -176,18 +172,18 @@ class Kalaha(object):
                         return path_complete
                     else:
                         if player1 == 1:
-                            path_complete.append((boardPass[7], path, limit, 0, boardPass, current))
+                            path_complete.append((boardPass[7], boardPass, 0, path))
                         else:
-                            path_complete.append((boardPass[0], path, limit, 0, boardPass, current))
+                            path_complete.append((boardPass[0], boardPass, 0, path))
 
                         while None in path_complete:
                             path_complete.remove(None)
                         return path_complete
                 else:
                     if player1 == 1:
-                        path_complete.append((boardPass[7], path, limit, 1, boardPass, current))
+                        path_complete.append((boardPass[7], path, 1, boardPass))
                     else:
-                        path_complete.append((boardPass[0], path, limit, 1, boardPass, current))
+                        path_complete.append((boardPass[0], path, 1, boardPass))
 
                     return path_complete
 
