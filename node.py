@@ -1,6 +1,8 @@
 class node:
 
-    boardState = []
+
+    boardstate = []
+    parent = None
     children = []
 
     def __init__(self, boardState, parent):
