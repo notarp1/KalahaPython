@@ -2,7 +2,7 @@ import copy
 from operator import is_not
 from functools import partial
 import json
-import numpy as np
+
 
 from node import node
 
@@ -30,8 +30,6 @@ class Kalaha(object):
 
     def evalmove(self, board, kugler, winner, limit, sum1, sum2):
 
-
-
         path = []
         path_complete = []
         path_list = []
@@ -53,20 +51,17 @@ class Kalaha(object):
 
         firstNode = node(board, None)
 
+        path_list = []
         for p in candidates:
-            print(p)
+
             firstNode.appendChild(node(p[1], firstNode))
 
-
-        path_list = []
-
         for currentNode in firstNode.get_childen():
-
             path = []
             path_complete = []
 
             for i in range(8, 14):
-                boardPass = list(currentNode.get_boardstate(currentNode))
+                boardPass = list(currentNode.boardState)
                 path_send = list(path_complete)
 
                 path_list.append(
@@ -85,6 +80,11 @@ class Kalaha(object):
             for x in sumcandidates:
                 print(x)
                 currentNode.appendChild(node(currentNode, x[1]))
+
+
+
+
+
 
     def getCandidates(self, candidates, path_list):
         for p in path_list:

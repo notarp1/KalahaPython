@@ -1,27 +1,30 @@
 class node:
 
+    boardState = []
+    children = []
+
     def __init__(self, boardState, parent):
         # Andre Node
-        self._boardState = boardState
-        self._parent = parent
-        self._children = [node]
+        self.boardState = boardState
+        self.parent = parent
+        self.children = []
 
     def player_points(self, player):
         if player == 1:
-            return self._boardState[0]
-        return self._boardState[7]
+            return self.boardState[0]
+        return self.boardState[7]
 
     def appendChild(self, child):
-        self._children.append(child)
+        self.children.append(child)
 
     def setChildren(self, children):
-        self._children = children
+        self.children = children
 
     def get_boardstate(self):
-        return self._boardState
+        return self.boardState
 
     def get_childen(self):
-        return self._children
+        return self.children
 
     def get_parent(self):
-        return self._parent
+        return self.parent
