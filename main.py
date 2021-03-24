@@ -6,6 +6,10 @@ import numpy as np
 
 
 class Kalaha(object):
+    playerIndex = 0
+    player1Hole = 7
+    player2Hole = 0
+    anotherTurn = False
 
     def printBoard(self, board):
         print("-----------------")
@@ -16,241 +20,170 @@ class Kalaha(object):
         print("  [1]   [2]   [3]   [4]   [5]  [6]")
         print("-----------------")
 
-    def isWinner(self, board, kugler, winner, sum1, sum2):
-        if board[0] + board[7] == kugler * 12:
-            winner = True
-            if sum1 < sum2:
-                print("Tillykke spiller1")
-            else:
-                print("Tillykke spiller2")
-            return winner
-        return winner
 
-    def evalmove(self, board, kugler, winner, limit, sum1, sum2):
-        path = []
-        path_complete = []
-        path_list = []
-        candidates = []
-        candidates_player2 = []
+    def createBoard(self, numberOfBalls):
+        boardCreated = [0, numberOfBalls, numberOfBalls, numberOfBalls, numberOfBalls, numberOfBalls, numberOfBalls, 0, numberOfBalls, numberOfBalls, numberOfBalls, numberOfBalls, numberOfBalls, numberOfBalls]
+        return boardCreated
 
-        for i in range(1, 7):
-            boardPass = list(board)
-            path_send = list(path_complete)
-            path_list.append(
-                self.recursive(boardPass, kugler, i, limit, winner, path, path_send, sum1, sum2, 1, 7, i, 1))
-        while None in path_list:
-            path_list.remove(None)
 
-        self.getCandidates(candidates, path_list)
-        print("----------------------------------------------------------------")
-        print("-----------------CANDIDATES PLAYER 1 ---------------------------")
-        print("----------------------------------------------------------------")
-        for p in candidates:
-            print(p)
+    def getInput(self):
+        print("Vælg hul")
+        kugler = int(input())
+        return kugler
 
-        path_list = []
-
-        for p in candidates:
-            path = []
-            path_complete = []
-
-            for i in range(8, 14):
-                boardPass = list(p[4])
-                path_send = list(path_complete)
-
-                path_list.append(
-                    self.recursive(boardPass, kugler, i, limit, winner, path, path_send, sum1, sum2, 8, 14, i, 0))
-            while None in path_list:
-                path_list.remove(None)
-
-            sumcandidates = []
-            self.getCandidates(sumcandidates, path_list)
-            candidates_player2.append(sumcandidates)
-            path_list = []
-            print("----------------------------------------------------------------")
-            print("-----------------CANDIDATES PLAYER 2 ---------------------------")
-            print("---------------------------------------------------------------")
-            for x in sumcandidates:
-                print(x)
-
-        path_list = []
-        candidates_player1 = []
-        for p in candidates_player2:
-            for m in p:
-                path = []
-                path_complete = []
-
-                for i in range(1, 7):
-                    boardPass = list(m[4])
-                    path_send = list(path_complete)
-
-                    path_list.append(
-                        self.recursive(boardPass, kugler, i, limit, winner, path, path_send, sum1, sum2, 1, 7, i, 1))
-                while None in path_list:
-                    path_list.remove(None)
-
-                sum_candidates = []
-                self.getCandidates(sum_candidates, path_list)
-                candidates_player1.append(sum_candidates)
-
-                path_list = []
-
-        for p in candidates_player1:
-            print("----------------------------------------------------------------")
-            print("-----------------CANDIDATES PLAYER 1 ---------------------------")
-            print("----------------------------------------------------------------")
-            for m in p:
-                print(m)
-
-    def getCandidates(self, candidates, path_list):
-        for p in path_list:
-            length = len(p)
-
-            if length < 2:
-                candidates.append(p[0])
-            else:
-                j = -1
-                prev = None
-                for a in p:
-                    if a[0] > j:
-                        j = a[0]
-                        if prev is not None:
-                            candidates.remove(prev)
-                            candidates.append(a)
-                            prev = a
-                        else:
-                            candidates.append(a)
-                            prev = a
-
-    def recursive(self, boardPass, kugler, iteration, limit, winner, path, path_complete, sum1, sum2, x1, x2, current,
-                  player1):
-        if limit == 0:
-            path = []
-
-        if limit > 5:
-            return path_complete
-
-        path.append(iteration)
-        switch = -1
-        if player1 == 1:
-            switch = 7
-        else:
-            switch = 0
-
-        selection = iteration
-        value = int(boardPass[selection])
-
-        if boardPass[selection] == 0:
-            return None
-
-        boardPass[selection] = 0
-        a = 0
-        for i in range(1, (value + 1)):
-            new_selection = selection + i
-
-            if new_selection > 13:
-                new_selection = new_selection - 14
-
-            if player1:
-                if new_selection == 0:
-                    a = a + 1
-            else:
-                if new_selection == 7:
-                    a = a + 1
-
-            boardPass[new_selection + a] += 1
-
-            if i == value:
-
-                if self.isWinner(boardPass, kugler, winner, sum1, sum2) == 0:
-
-                    if new_selection == switch:
-                        limit = limit + 1
-                        for j in range(x1, x2):
-                            boardsend = list(boardPass)
-                            pathsend = list(path)
-
-                            self.recursive(boardsend, kugler, j, limit, winner, pathsend, path_complete, sum1, sum2, x1,
-                                           x2, current, player1)
-
-                        return path_complete
-                    else:
-                        if player1 == 1:
-                            path_complete.append((boardPass[7], path, limit, 0, boardPass, current))
-                        else:
-                            path_complete.append((boardPass[0], path, limit, 0, boardPass, current))
-
-                        while None in path_complete:
-                            path_complete.remove(None)
-                        return path_complete
-                else:
-                    if player1 == 1:
-                        path_complete.append((boardPass[7], path, limit, 1, boardPass, current))
-                    else:
-                        path_complete.append((boardPass[0], path, limit, 1, boardPass, current))
-
-                    return path_complete
 
     def playGame(self):
-        print("Vælg antal kugler")
-        kugler = int(input())
-        sum1 = 0
-        sum2 = 0
-        board = [sum1, kugler, kugler, kugler, kugler, kugler, kugler, sum2, kugler, kugler, kugler, kugler, kugler,
-                 kugler]
-
-        winner = False
-        player1 = True
-        player2 = False
-
-        while winner == 0:
-
+        board = self.createBoard(6)
+        while not self.terminalTest(board):
             self.printBoard(board)
-            if player1:
-                self.evalmove(board, kugler, winner, 0, sum1, sum2)
-            print("Vælg række")
-
-            selection = int(input())
-            value = int(board[selection])
-            board[selection] = 0
-            a = 0
-            for i in range(1, (value + 1)):
-                new_selection = selection + i
-
-                if new_selection > 13:
-                    new_selection = new_selection - 14
-
-                if player1:
-                    if new_selection == 0:
-                        a = a + 1
-                if player2:
-                    if new_selection == 7:
-                        a = a + 1
-
-                board[new_selection + a] += 1
-
-                if i == value:
-
-                    if self.isWinner(board, kugler, winner, sum1, sum2) == 0:
-
-                        if player1:
-                            if new_selection == 7:
-                                print("Ektra tur til spiller 1")
-
-                            else:
-                                print("Player 2 tur")
-                                player1 = False
-                                player2 = True
-                        else:
-                            if new_selection == 0:
-                                print("Ektra tur til spiller 2 ")
-                            else:
-                                print("Player 1 tur")
-                                player1 = True
-                                player2 = False
+            move = self.getInput()
+            #playerPoints = self.getPlayerPoints(board)
+            #boardStates = [self.results(board, self.action(board))]
+            boardStatesDeep = [self.deepResults(board, 2)]
+            print("players move:", boardStatesDeep[0][0]+1, " otherplayers move:", boardStatesDeep[0][1]+1)
+            self.anotherTurn = self.move(board, boardStatesDeep[0][0]+1)
+            if not self.anotherTurn:
+                self.playerIndex = (self.playerIndex + 1) % 2
 
 
+    def getPlayerPoints(self, board):
+        if self.player() == 0:
+            playerHole = self.player1Hole
+        else:
+            playerHole = self.player2Hole
+        return board[playerHole]
 
 
-game = Kalaha()
-game.playGame()
+    def player(self):
+        return self.playerIndex
+
+
+    def action(self, board):
+        actions = []
+        if self.player() == 0:
+            start = 1
+            end = 7
+        else:
+            start = 8
+            end = 14
+        for i in range(start, end):
+            if board[i] != 0:
+                actions.append(i)
+        return actions
+
+
+    def results(self, board, actions):
+        resultReturn = []
+        playerPoints = self.getPlayerPoints(board)
+        for a in actions:
+            boardPass = list(board)
+            anotherTurn = self.move(boardPass, a)
+            if anotherTurn:
+                self.anotherTurnCheck(boardPass, playerPoints)
+            listToAdd = [boardPass, self.utility(boardPass, playerPoints)]
+            resultReturn.append(listToAdd)
+        return resultReturn
+
+    def deepResults(self, board, depth):
+        resultReturn = []
+        path = []
+        originalPlayer = self.playerIndex
+        for i in range(0, depth):
+            playerPoints = self.getPlayerPoints(board)
+            if i == 0:
+                for a in self.action(board):
+                    currentPath = list(path)
+                    boardPass = list(board)
+                    anotherTurn = self.move(boardPass, a)
+                    currentPath.append(a)
+                    if anotherTurn:
+                        currentPath = self.anotherTurnCheck(boardPass, playerPoints, currentPath)
+                    path.append(currentPath)
+                    listToAdd = [boardPass, self.utility(boardPass, playerPoints)]
+                    resultReturn.append(listToAdd)
+                self.playerIndex = (self.playerIndex + 1) % 2
+            if i == 1:
+                for boards in resultReturn:
+                    boardPass = list(boards[0])
+                    for a in self.action(boards[0]):
+                        currentPath = list(path)
+                        boardPass2 = list(boardPass)
+                        anotherTurn = self.move(boardPass2, a)
+                        currentPath.append(a)
+                        if anotherTurn:
+                            self.anotherTurnCheck(boardPass2, playerPoints, currentPath)
+                        listToAdd = [boardPass2, self.utility(boardPass2, playerPoints)]
+                        boards[0].append(listToAdd)
+        self.playerIndex = originalPlayer
+        return self.minmax(resultReturn)
+
+    def anotherTurnCheck(self, board, playerPoints, currentPath):
+        pathsAndUtil = []
+        for index, a in enumerate(self.action(board)):
+            path = list(currentPath)
+            boardPass = list(board)
+            anotherTurn = self.move(boardPass, a)
+            path.append(a)
+            if anotherTurn:
+                pathsAndUtil.append(self.anotherTurnCheck(boardPass, playerPoints, path))
+            else:
+                listToAdd = [path, self.utility(boardPass, playerPoints)]
+                pathsAndUtil.append(listToAdd)
+        return pathsAndUtil
+
+    def minmax(self, results):
+        path = []
+        currentMin = 10000
+        for index, states in enumerate(results):
+            for state in range(14, len(states[0])):
+                if currentMin > (states[0][state][1] - states[1]):
+                    currentMin = (states[0][state][1] - states[1])
+                    if self.playerIndex == 0:
+                        path = [index, state - 14+7]
+                    else:
+                        path = [index+7, state-14]
+        return path
+
+
+
+    def move(self, board, action):
+        if self.player() == 0:
+            otherHole = self.player2Hole
+            playerHole = self.player1Hole
+        else:
+            otherHole = self.player1Hole
+            playerHole = self.player2Hole
+        numberOfBalls = board[action]
+        board[action] = 0
+        otherGoalCount = 0
+        for i in range(0, numberOfBalls):
+            if (action+i+1) % 14 != otherHole:
+                board[(action+i+1+otherGoalCount) % 14] += 1
+            else:
+                i -= 1
+                otherGoalCount += 1
+            if i+1 == numberOfBalls:
+                if (action+i+1+otherGoalCount) % 14 == playerHole:
+                    return True
+        return False
+
+
+    def terminalTest(self, board):
+        for place in board:
+            if place != self.player1Hole and place != self.player2Hole:
+                if place != 0:
+                    return 0
+        return 1
+
+
+    def utility(self, state, startPoints):
+        if self.player() == 0:
+            hole = self.player1Hole
+        else:
+            hole = self.player2Hole
+        return state[hole]-startPoints
+
+
+if __name__ == "__main__":
+    game = Kalaha()
+    game.playGame()
