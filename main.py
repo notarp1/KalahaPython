@@ -36,14 +36,16 @@ class Kalaha(object):
         board = self.createBoard(6)
         while not self.terminalTest(board):
             self.printBoard(board)
-            move = self.getInput()
+            #move = self.getInput()
+            path = []
             #playerPoints = self.getPlayerPoints(board)
             #boardStates = [self.results(board, self.action(board))]
-            boardStatesDeep = [self.deepResults(board, 2)]
-            print("players move:", boardStatesDeep[0][0]+1, " otherplayers move:", boardStatesDeep[0][1]+1)
-            self.anotherTurn = self.move(board, boardStatesDeep[0][0]+1)
-            if not self.anotherTurn:
-                self.playerIndex = (self.playerIndex + 1) % 2
+            boardStatesDeep = [self.pathResults(board, self.getPlayerPoints(board), path, 2)]
+            path.append(boardStatesDeep)
+            #print("players move:", boardStatesDeep[0][0]+1, " otherplayers move:", boardStatesDeep[0][1]+1)
+            #self.anotherTurn = self.move(board, boardStatesDeep[0][0]+1)
+            #if not self.anotherTurn:
+            #    self.playerIndex = (self.playerIndex + 1) % 2
 
 
     def getPlayerPoints(self, board):
@@ -72,51 +74,6 @@ class Kalaha(object):
         return actions
 
 
-    def results(self, board, actions):
-        resultReturn = []
-        playerPoints = self.getPlayerPoints(board)
-        for a in actions:
-            boardPass = list(board)
-            anotherTurn = self.move(boardPass, a)
-            if anotherTurn:
-                self.anotherTurnCheck(boardPass, playerPoints)
-            listToAdd = [boardPass, self.utility(boardPass, playerPoints)]
-            resultReturn.append(listToAdd)
-        return resultReturn
-
-    def deepResults(self, board, depth):
-        resultReturn = []
-        path = []
-        originalPlayer = self.playerIndex
-        for i in range(0, depth):
-            playerPoints = self.getPlayerPoints(board)
-            if i == 0:
-                for a in self.action(board):
-                    currentPath = list(path)
-                    boardPass = list(board)
-                    anotherTurn = self.move(boardPass, a)
-                    currentPath.append(a)
-                    if anotherTurn:
-                        currentPath = self.anotherTurnCheck(boardPass, playerPoints, currentPath)
-                    path.append(currentPath)
-                    listToAdd = [boardPass, self.utility(boardPass, playerPoints)]
-                    resultReturn.append(listToAdd)
-                self.playerIndex = (self.playerIndex + 1) % 2
-            if i == 1:
-                for boards in resultReturn:
-                    boardPass = list(boards[0])
-                    for a in self.action(boards[0]):
-                        currentPath = list(path)
-                        boardPass2 = list(boardPass)
-                        anotherTurn = self.move(boardPass2, a)
-                        currentPath.append(a)
-                        if anotherTurn:
-                            self.anotherTurnCheck(boardPass2, playerPoints, currentPath)
-                        listToAdd = [boardPass2, self.utility(boardPass2, playerPoints)]
-                        boards[0].append(listToAdd)
-        self.playerIndex = originalPlayer
-        return self.minmax(resultReturn)
-
     def anotherTurnCheck(self, board, playerPoints, currentPath):
         pathsAndUtil = []
         for index, a in enumerate(self.action(board)):
@@ -127,9 +84,52 @@ class Kalaha(object):
             if anotherTurn:
                 pathsAndUtil.append(self.anotherTurnCheck(boardPass, playerPoints, path))
             else:
-                listToAdd = [path, self.utility(boardPass, playerPoints)]
+                if self.player() == 0:
+                    listToAdd = [path, self.utility(boardPass, playerPoints)]
+                else:
+                    listToAdd = [path, -self.utility(boardPass, playerPoints)]
                 pathsAndUtil.append(listToAdd)
         return pathsAndUtil
+
+    def pathResults(self, startBoard, playerPoints, currentPath, depth):
+        pathsAndUtil = list(currentPath)
+        fullyNewPath = []
+        currentPlayer = self.player()
+        originalPath = []
+
+        if not currentPath:
+            replacementBoard = list(startBoard)
+            path = self.anotherTurnCheck(replacementBoard, playerPoints, pathsAndUtil)
+            pathsAndUtil.append(path)
+        else:
+            for paths in currentPath[0]:
+                originalPath = list(paths)
+                self.playerIndex = 0
+                currentBoard = list(startBoard)
+                while isinstance(originalPath[0], list):
+                    originalPath = originalPath[0]
+                for i in range(0, len(originalPath)):
+                    print(originalPath)
+                    anotherTurn = self.move(currentBoard, originalPath[i])
+                    if not anotherTurn:
+                        self.changePlayer()
+
+                newPaths = self.anotherTurnCheck(currentBoard, playerPoints, originalPath)
+                originalPath = list(paths)
+                while isinstance(originalPath[0][0], list):
+                    originalPath = originalPath[0]
+                for newpath in newPaths:
+                    newpath[1] += originalPath[1]
+                    fullyNewPath.append(newpath)
+
+        if depth-1 == 0:
+            return pathsAndUtil
+        else:
+            self.changePlayer()
+            return self.pathResults(startBoard, playerPoints, pathsAndUtil, depth-1)
+
+    def changePlayer(self):
+        self.playerIndex = (self.playerIndex + 1) % 2
 
     def minmax(self, results):
         path = []
@@ -145,7 +145,6 @@ class Kalaha(object):
         return path
 
 
-
     def move(self, board, action):
         if self.player() == 0:
             otherHole = self.player2Hole
@@ -157,13 +156,13 @@ class Kalaha(object):
         board[action] = 0
         otherGoalCount = 0
         for i in range(0, numberOfBalls):
-            if (action+i+1) % 14 != otherHole:
+            if (action+i+1+otherGoalCount) % 14 != otherHole:
                 board[(action+i+1+otherGoalCount) % 14] += 1
             else:
-                i -= 1
                 otherGoalCount += 1
+                board[(action+i+1+otherGoalCount) % 14] += 1
             if i+1 == numberOfBalls:
-                if (action+i+1+otherGoalCount) % 14 == playerHole:
+                if (action+i+1) % 14 == playerHole:
                     return True
         return False
 
