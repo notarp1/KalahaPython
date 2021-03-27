@@ -10,6 +10,7 @@ class Kalaha(object):
     player1Hole = 7
     player2Hole = 0
     anotherTurn = False
+    turnCounter = 0
 
     def printBoard(self, board):
         print("-----------------")
@@ -34,18 +35,23 @@ class Kalaha(object):
 
     def playGame(self):
         board = self.createBoard(6)
+        path = []
         while not self.terminalTest(board):
             self.printBoard(board)
-            #move = self.getInput()
-            path = []
-            #playerPoints = self.getPlayerPoints(board)
-            #boardStates = [self.results(board, self.action(board))]
-            boardStatesDeep = [self.pathResults(board, self.getPlayerPoints(board), path, 2)]
-            path.append(boardStatesDeep)
-            #print("players move:", boardStatesDeep[0][0]+1, " otherplayers move:", boardStatesDeep[0][1]+1)
-            #self.anotherTurn = self.move(board, boardStatesDeep[0][0]+1)
-            #if not self.anotherTurn:
-            #    self.playerIndex = (self.playerIndex + 1) % 2
+            if self.player() == 0:
+                boardStatesDeep = [self.pathResults(self.getPlayerPoints(board), path, 2)]
+                path.append(boardStatesDeep)
+                while isinstance(path[0], list):
+                    path = path[0]
+                print("moving with ", path)
+                for move in boardStatesDeep:
+                    self.move(board, move)
+            else:
+                move = self.getInput()
+                path.append(move)
+                self.move(board, move)
+            self.changePlayer()
+            self.turnCounter += 1
 
 
     def getPlayerPoints(self, board):
@@ -82,7 +88,8 @@ class Kalaha(object):
             anotherTurn = self.move(boardPass, a)
             path.append(a)
             if anotherTurn:
-                pathsAndUtil.append(self.anotherTurnCheck(boardPass, playerPoints, path))
+                for p in self.anotherTurnCheck(boardPass, playerPoints, path):
+                    pathsAndUtil.append(p)
             else:
                 if self.player() == 0:
                     listToAdd = [path, self.utility(boardPass, playerPoints)]
@@ -91,58 +98,85 @@ class Kalaha(object):
                 pathsAndUtil.append(listToAdd)
         return pathsAndUtil
 
-    def pathResults(self, startBoard, playerPoints, currentPath, depth):
+    def pathResults(self, playerPoints, currentPath, depth):
+        startBoard = self.createBoard(6)
         pathsAndUtil = list(currentPath)
         fullyNewPath = []
-        currentPlayer = self.player()
-        originalPath = []
 
         if not currentPath:
             replacementBoard = list(startBoard)
             path = self.anotherTurnCheck(replacementBoard, playerPoints, pathsAndUtil)
             pathsAndUtil.append(path)
         else:
-            for paths in currentPath[0]:
-                originalPath = list(paths)
-                self.playerIndex = 0
+            if isinstance(currentPath[0], list):
+                for paths in currentPath:
+                    originalPath = list(paths)
+                    self.playerIndex = 0
+                    currentBoard = list(startBoard)
+                    while isinstance(originalPath[0], list):
+                        originalPath = originalPath[0]
+                    for i in range(0, len(originalPath)):
+                        anotherTurn = self.move(currentBoard, originalPath[i])
+                        if not anotherTurn:
+                            self.changePlayer()
+
+                    newPaths = self.anotherTurnCheck(currentBoard, playerPoints, originalPath)
+                    originalPath = list(paths)
+                    while isinstance(originalPath[0][0], list):
+                        originalPath = originalPath[0]
+                    for newpath in newPaths:
+                        newpath[1] += originalPath[1]
+                        fullyNewPath.append(newpath)
+                pathsAndUtil = fullyNewPath
+
+            else:
                 currentBoard = list(startBoard)
-                while isinstance(originalPath[0], list):
-                    originalPath = originalPath[0]
-                for i in range(0, len(originalPath)):
-                    print(originalPath)
-                    anotherTurn = self.move(currentBoard, originalPath[i])
+                for i in range(0, len(currentPath)):
+                    anotherTurn = self.move(currentBoard, currentPath[i])
                     if not anotherTurn:
                         self.changePlayer()
-
-                newPaths = self.anotherTurnCheck(currentBoard, playerPoints, originalPath)
-                originalPath = list(paths)
-                while isinstance(originalPath[0][0], list):
-                    originalPath = originalPath[0]
+                newPaths = self.anotherTurnCheck(currentBoard, playerPoints, currentPath)
                 for newpath in newPaths:
-                    newpath[1] += originalPath[1]
                     fullyNewPath.append(newpath)
+                pathsAndUtil = fullyNewPath
+
+
+
 
         if depth-1 == 0:
-            return pathsAndUtil
+            return self.minmax(pathsAndUtil)
         else:
             self.changePlayer()
-            return self.pathResults(startBoard, playerPoints, pathsAndUtil, depth-1)
+            return self.pathResults(playerPoints, pathsAndUtil, depth-1)
 
     def changePlayer(self):
         self.playerIndex = (self.playerIndex + 1) % 2
 
-    def minmax(self, results):
+    def minmax(self, currentPath):
         path = []
-        currentMin = 10000
-        for index, states in enumerate(results):
-            for state in range(14, len(states[0])):
-                if currentMin > (states[0][state][1] - states[1]):
-                    currentMin = (states[0][state][1] - states[1])
-                    if self.playerIndex == 0:
-                        path = [index, state - 14+7]
-                    else:
-                        path = [index+7, state-14]
-        return path
+        returnPath = []
+        currentMax = -10000
+        while isinstance(currentPath[0][0][0], list):
+            currentPath = currentPath[0]
+
+        for paths in currentPath:
+            if paths[1] > currentMax:
+                currentMax = paths[1]
+                path = paths[0]
+        tempBoard = self.createBoard(6)
+        self.playerIndex = 0
+        currentTurnCounter = 0
+        for moves in path:
+            if not currentTurnCounter == self.turnCounter:
+                if not self.move(tempBoard, moves):
+                    currentTurnCounter += 1
+            else:
+                if not self.move(tempBoard, moves):
+                    returnPath.append(moves)
+                    break
+                else:
+                    returnPath.append(moves)
+        return returnPath
 
 
     def move(self, board, action):
