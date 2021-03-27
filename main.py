@@ -11,80 +11,113 @@ class Kalaha(object):
 
     def printBoard(self, board):
         print("-----------------")
-        print("  [13]  [12]  [11]  [10]  [9]  [8]")
+        print("  [13]  [12]  [11]   [10]   [9]   [8]")
         print("  ", board[13], "   ", board[12], "   ", board[11], "   ", board[10], "   ", board[9], "   ", board[8])
-        print(board[0], "                                 ", board[7])
+        print(board[0], "                                      ", board[7])
         print("  ", board[1], "   ", board[2], "   ", board[3], "   ", board[4], "   ", board[5], "   ", board[6])
-        print("  [1]   [2]   [3]   [4]   [5]  [6]")
+        print("  [1]    [2]    [3]    [4]    [5]    [6]")
         print("-----------------")
 
-    def isWinner(self, board, kugler, winner, sum1, sum2):
+    def isWinner(self, board, kugler, winner):
         if board[0] + board[7] == kugler * 12:
             winner = True
-            if sum1 < sum2:
+            if board[0] < board[7]:
                 print("Tillykke spiller1")
             else:
                 print("Tillykke spiller2")
             return winner
         return winner
 
-    def evalmove(self, board, kugler, winner, limit, sum1, sum2, maxDepth):
+    def evalmove(self, board, kugler, winner, limit, maxDepth):
 
         path = []
         path_complete = []
         path_list = []
         candidates = []
-        candidates_player2 = []
 
         for i in range(1, 7):
             boardPass = list(board)
             path_send = list(path_complete)
             path_list.append(
-                self.recursive(boardPass, kugler, i, limit, winner, path, path_send, sum1, sum2, 1, 7, i, 1))
+                self.recursive(boardPass, kugler, i, limit, winner, path, path_send, 1, 7, i, 1))
         while None in path_list:
             path_list.remove(None)
 
         self.getCandidates(candidates, path_list)
 
-        firstNode = node(board, None)
+        first_node = node(board, None, None)
+
+        for p in candidates:
+            first_node.appendChild(node(p[1], first_node, p[3]))
+
+        node_final = self.depth_search(candidates, first_node, maxDepth, 1, kugler, limit, winner)
+        print(node_final)
+
+
+    #####ØHHHHHHHHHHHHH?????? mangler minimax implementation
+    def minimax(self, curDepth, maxTurn, score, targetDepth, node):
+
+        score.append(node.player_points(maxTurn))
+        eval = []
+        if curDepth == targetDepth:
+            return max(score)
+
+        if maxTurn:
+
+            for child in node.get_childen():
+                eval.append(self.minimax(curDepth + 1, False, score, targetDepth, child))
+            return max(eval)
+
+        else:
+            for child in node.get_childen():
+                eval.append(self.minimax(curDepth + 1, True, score, targetDepth, child))
+            return min(eval)
+
+    def depth_search(self, candidates, parentNode, maxDepth, k, kugler, limit, winner):
+        if k == maxDepth:
+            return
 
         path_list = []
 
-        for i in range(1, maxDepth):
-            start = 8
-            end = 14
-            if i % 2 == 0:
-                start = 1
-                end = 7
+        start = 8
+        end = 14
+        printnummber = 2
+        if k % 2 == 0:
+            start = 1
+            end = 7
+            printnummber = 1
+        k += 1
 
-            for p in candidates:
+        for currentNode in parentNode.get_childen():
+            path = []
+            path_complete = []
 
-                firstNode.appendChild(node(p[1], firstNode))
-                print(firstNode.get_childen()[0].get_boardstate())
+            for i in range(start, end):
+                board_pass = list(currentNode.boardstate)
+                path_send = list(path_complete)
+                path_list.append(
+                    self.recursive(board_pass, kugler, i, limit, winner, path, path_send, start, end, i, 0))
 
-            for currentNode in firstNode.get_childen():
-                path = []
-                path_complete = []
+            while None in path_list:
+                path_list.remove(None)
 
-                for i in range(8, 14):
-                    boardPass = list(currentNode.boardState)
-                    path_send = list(path_complete)
+            temp_candidates = []
+            self.getCandidates(temp_candidates, path_list)
+            candidates.append(temp_candidates)
+            path_list = []
 
-                    path_list.append(
-                        self.recursive(boardPass, kugler, i, limit, winner, path, path_send, sum1, sum2, start, end, i, 0))
-                while None in path_list:
-                    path_list.remove(None)
+            for x in temp_candidates:
+                currentNode.appendChild(node(x[1], currentNode, x[3]))
 
-                sumcandidates = []
-                self.getCandidates(sumcandidates, path_list)
-                candidates_player2.append(sumcandidates)
-                path_list = []
-
-                for x in sumcandidates:
-                    currentNode.appendChild(node(currentNode, x[1]))
-            candidates = candidates_player2
+            self.depth_search(candidates, currentNode, maxDepth, k, kugler, limit, winner)
+        return parentNode
 
 
+
+    def print_candidates(self, printnummber):
+        print("----------------------------------------------")
+        print("-----------CANDIDATES PLAYER ", printnummber, "-----------------")
+        print("----------------------------------------------")
 
     def getCandidates(self, candidates, path_list):
         for p in path_list:
@@ -106,14 +139,11 @@ class Kalaha(object):
                             candidates.append(a)
                             prev = a
 
-    def recursive(self, boardPass, kugler, iteration, limit, winner, path, path_complete, sum1, sum2, x1, x2, current,
+    def recursive(self, boardPass, kugler, iteration, limit, winner, path, path_complete, x1, x2, current,
                   player1):
+
         if limit == 0:
             path = []
-
-        if limit > 5:
-            return path_complete
-
         path.append(iteration)
         switch = -1
         if player1 == 1:
@@ -129,6 +159,8 @@ class Kalaha(object):
 
         boardPass[selection] = 0
         a = 0
+
+
         for i in range(1, (value + 1)):
             new_selection = selection + i
 
@@ -141,20 +173,24 @@ class Kalaha(object):
             else:
                 if new_selection == 7:
                     a = a + 1
-
-            boardPass[new_selection + a] += 1
+            eval = new_selection + a
+            while eval > 13:
+                if eval > 13:
+                    eval = eval - 14
+            boardPass[eval] += 1
 
             if i == value:
 
-                if self.isWinner(boardPass, kugler, winner, sum1, sum2) == 0:
+                if self.isWinner(boardPass, kugler, winner) == 0:
 
                     if new_selection == switch:
                         limit = limit + 1
                         for j in range(x1, x2):
+
                             boardsend = list(boardPass)
                             pathsend = list(path)
 
-                            self.recursive(boardsend, kugler, j, limit, winner, pathsend, path_complete, sum1, sum2, x1,
+                            self.recursive(boardsend, kugler, j, 1, winner, pathsend, path_complete, x1,
                                            x2, current, player1)
 
                         return path_complete
@@ -191,7 +227,8 @@ class Kalaha(object):
 
             self.printBoard(board)
             if player1:
-                self.evalmove(board, kugler, winner, 0, sum1, sum2, 4)
+                self.evalmove(board, kugler, winner, 0, 3)
+                self.printBoard(board)
             print("Vælg række")
 
             selection = int(input())
@@ -215,7 +252,7 @@ class Kalaha(object):
 
                 if i == value:
 
-                    if self.isWinner(board, kugler, winner, sum1, sum2) == 0:
+                    if self.isWinner(board, kugler, winner) == 0:
 
                         if player1:
                             if new_selection == 7:
