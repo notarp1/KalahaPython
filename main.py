@@ -1,10 +1,3 @@
-import copy
-from operator import is_not
-from functools import partial
-import json
-import numpy as np
-
-
 class Kalaha(object):
     playerIndex = 0
     player1Hole = 7
@@ -39,19 +32,38 @@ class Kalaha(object):
         while not self.terminalTest(board):
             self.printBoard(board)
             if self.player() == 0:
-                boardStatesDeep = [self.pathResults(self.getPlayerPoints(board), path, 2)]
-                path.append(boardStatesDeep)
-                while isinstance(path[0], list):
-                    path = path[0]
-                print("moving with ", path)
+                boardStatesDeep = [self.pathResults(self.getPlayerPoints(board), path, 4)]
+                tempPath = []
+                if path:
+                    while isinstance(path[0], list):
+                        path = path[0]
+                    for moves in path:
+                        tempPath.append(moves)
+                while isinstance(boardStatesDeep[0], list):
+                    boardStatesDeep = boardStatesDeep[0]
+                print("AI moved with ", boardStatesDeep)
                 for move in boardStatesDeep:
                     self.move(board, move)
+                    tempPath.append(move)
+                path = tempPath
+                self.playerIndex = 0
+                self.changePlayer()
+                self.turnCounter += 1
+
             else:
                 move = self.getInput()
-                path.append(move)
-                self.move(board, move)
-            self.changePlayer()
-            self.turnCounter += 1
+                tempPath = []
+                while isinstance(path[0], list):
+                    path = path[0]
+                for moves in path:
+                    tempPath.append(moves)
+                tempPath.append(move)
+                print("You moved with ", move)
+                path = tempPath
+                extraTurn = self.move(board, move)
+                self.turnCounter += 1
+                if not extraTurn:
+                    self.changePlayer()
 
 
     def getPlayerPoints(self, board):
@@ -102,13 +114,16 @@ class Kalaha(object):
         startBoard = self.createBoard(6)
         pathsAndUtil = list(currentPath)
         fullyNewPath = []
+        currentBoard = []
 
         if not currentPath:
-            replacementBoard = list(startBoard)
-            path = self.anotherTurnCheck(replacementBoard, playerPoints, pathsAndUtil)
+            currentBoard = list(startBoard)
+            path = self.anotherTurnCheck(currentBoard, playerPoints, pathsAndUtil)
             pathsAndUtil.append(path)
         else:
             if isinstance(currentPath[0], list):
+                while isinstance(currentPath[0][0][0], list):
+                    currentPath = currentPath[0]
                 for paths in currentPath:
                     originalPath = list(paths)
                     self.playerIndex = 0
@@ -130,24 +145,23 @@ class Kalaha(object):
                 pathsAndUtil = fullyNewPath
 
             else:
+                self.playerIndex = 0
                 currentBoard = list(startBoard)
                 for i in range(0, len(currentPath)):
                     anotherTurn = self.move(currentBoard, currentPath[i])
                     if not anotherTurn:
                         self.changePlayer()
+                self.playerIndex = 0
                 newPaths = self.anotherTurnCheck(currentBoard, playerPoints, currentPath)
                 for newpath in newPaths:
                     fullyNewPath.append(newpath)
                 pathsAndUtil = fullyNewPath
 
-
-
-
         if depth-1 == 0:
             return self.minmax(pathsAndUtil)
         else:
             self.changePlayer()
-            return self.pathResults(playerPoints, pathsAndUtil, depth-1)
+            return self.pathResults(self.getPlayerPoints(currentBoard), pathsAndUtil, depth-1)
 
     def changePlayer(self):
         self.playerIndex = (self.playerIndex + 1) % 2
