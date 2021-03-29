@@ -3,7 +3,6 @@ from operator import is_not
 from functools import partial
 import json
 
-
 from node import node
 
 
@@ -51,27 +50,24 @@ class Kalaha(object):
             first_node.appendChild(node(p[1], first_node, p[3]))
 
         node_final = self.depth_search(candidates, first_node, maxDepth, 1, kugler, limit, winner)
-        print(node_final)
-
+        print("din mor")
+        print(first_node.get_childen()[0])
+        return node_final
 
     #####ØHHHHHHHHHHHHH?????? mangler minimax implementation
-    def minimax(self, curDepth, maxTurn, score, targetDepth, node):
+    def minimax(self, dept, currnode, maximize, pointIdex):
+        values = []
+        if (not currnode.get_childen()):
+            return currnode.get_boardstate()[pointIdex]
 
-        score.append(node.player_points(maxTurn))
-        eval = []
-        if curDepth == targetDepth:
-            return max(score)
+        for n in currnode.get_childen():
+            values.append(self.minimax(dept + 1, n, not maximize, pointIdex))
+        if (dept == 0):
+            return values.index(max(values)) +1
+        if (maximize == True):
+            return max(values)
 
-        if maxTurn:
-
-            for child in node.get_childen():
-                eval.append(self.minimax(curDepth + 1, False, score, targetDepth, child))
-            return max(eval)
-
-        else:
-            for child in node.get_childen():
-                eval.append(self.minimax(curDepth + 1, True, score, targetDepth, child))
-            return min(eval)
+        return min(values)
 
     def depth_search(self, candidates, parentNode, maxDepth, k, kugler, limit, winner):
         if k == maxDepth:
@@ -111,8 +107,6 @@ class Kalaha(object):
 
             self.depth_search(candidates, currentNode, maxDepth, k, kugler, limit, winner)
         return parentNode
-
-
 
     def print_candidates(self, printnummber):
         print("----------------------------------------------")
@@ -160,7 +154,6 @@ class Kalaha(object):
         boardPass[selection] = 0
         a = 0
 
-
         for i in range(1, (value + 1)):
             new_selection = selection + i
 
@@ -186,7 +179,6 @@ class Kalaha(object):
                     if new_selection == switch:
                         limit = limit + 1
                         for j in range(x1, x2):
-
                             boardsend = list(boardPass)
                             pathsend = list(path)
 
@@ -226,12 +218,23 @@ class Kalaha(object):
         while winner == 0:
 
             self.printBoard(board)
-            if player1:
-                self.evalmove(board, kugler, winner, 0, 3)
-                self.printBoard(board)
-            print("Vælg række")
 
-            selection = int(input())
+            selection = 0;
+            if player1:
+                node1 = self.evalmove(board, kugler, winner, 0, 3)
+                index = self.minimax(0,node1, True,7)
+                i = 1
+                while(True):
+                    if(board[i] == 0):
+                        index+=1
+                    if(i==index):
+                        selection = i;
+                        print(selection)
+                        break
+                    i+= 1
+            if player2:
+                print("Vælg række")
+                selection = int(input())
             value = int(board[selection])
             board[selection] = 0
             a = 0
@@ -269,8 +272,6 @@ class Kalaha(object):
                                 print("Player 1 tur")
                                 player1 = True
                                 player2 = False
-
-
 
 
 game = Kalaha()
