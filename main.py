@@ -291,9 +291,6 @@ class Kalaha(object):
 
 
     def playGame(self):
-        print("Vælg antal kugler")
-
-  
         kugler = 6
         self.kugler = kugler
         sum1 = 0
