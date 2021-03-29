@@ -270,6 +270,8 @@ class Kalaha(object):
     def playGame(self):
         print("Vælg antal kugler")
         kugler = int(input())
+
+  
         sum1 = 0
         sum2 = 0
         board = [sum1, kugler, kugler, kugler, kugler, kugler, kugler, sum2, kugler, kugler, kugler, kugler, kugler,
@@ -303,10 +305,14 @@ class Kalaha(object):
                 self.printBoard(board)
                 if self.canMove(board, 1):
                     print("Vælg række")
+                         # Randome-test: In order to test the efficiency of the AI, we can try to compare it to a player that picks completly randome. 
+                         # To test this: 1. "comment out" line 243 and 250.      
+                         # And "comment in" the following three lines:
                     #selection = random.randint(8, 13)
                     #while board[selection] == 0:
                     #    selection = random.randint(8, 13)
                     selection = int(input())
+
                     print("selected ", selection)
                 else:
                     selection = -1
