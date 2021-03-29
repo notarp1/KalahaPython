@@ -10,13 +10,13 @@ import random
 class Kalaha(object):
     kugler = 0
     def printBoard(self, board):
-        print("-----------------")
+        print("----------------------------------------------")
         print("  [13]  [12]  [11]   [10]   [9]   [8]")
         print("  ", board[13], "   ", board[12], "   ", board[11], "   ", board[10], "   ", board[9], "   ", board[8])
         print(board[0], "                                      ", board[7])
         print("  ", board[1], "   ", board[2], "   ", board[3], "   ", board[4], "   ", board[5], "   ", board[6])
         print("  [1]    [2]    [3]    [4]    [5]    [6]")
-        print("-----------------")
+        print("----------------------------------------------")
 
     def isWinner(self, board, kugler, winner):
         if board[0] + board[7] == kugler * 12:
@@ -82,7 +82,7 @@ class Kalaha(object):
         # print(first_node.get_childen()[0])
         return node_final
 
-    #####ØHHHHHHHHHHHHH?????? mangler minimax implementation
+
     def minimax(self, dept, currnode, maximize, pointIdex):
         values = []
         if (not currnode.get_childen()):
@@ -232,7 +232,6 @@ class Kalaha(object):
                     return path_complete
 
     def playGame(self):
-        print("Vælg antal kugler")
         kugler = 6
         self.kugler = kugler
         sum1 = 0
@@ -260,23 +259,23 @@ class Kalaha(object):
                             index += 1
                         if i == index:
                             selection = i
-                            print(selection)
+                            print("The AI chose ",selection)
                             break
                         i += 1
                 else:
                     selection = -1
             if player2:
                 if self.canMove(board, 1):
-                    print("Vælg række")
+                    print("Choose a number on the top row (8-13)")
                     #selection = random.randint(8, 13)
                     #while board[selection] == 0:
                     #   selection = random.randint(8, 13)
                     selection = int(input())
                     while (8 > selection or selection > 13):
-                       print("Vælg række mellem 8-13")
+                       print("Choose between 8-13")
                        selection = int(input()) 
 
-                    print("selected ", selection)
+                    print("You chose ", selection)
                 else:
                     selection = -1
 
@@ -284,19 +283,21 @@ class Kalaha(object):
                 if player1:
                     if self.isWinner(board, kugler, winner):
                         if(board[0] > board[7]):
-                            print("Player 2 du har vundet")
+                            self.printBoard(board)
+                            print("The AI won")
                         else:
-                            print("Player 1 du har vundet")
+                            self.printBoard(board)
+                            print("You won")
                         break
                     else:
-                        print("Player 2 tur")
+                        print("\nYour turn")
                         player1 = False
                         player2 = True
                 else:
                     if self.isWinner(board, kugler, winner):
                         winner = True
                     else:
-                        print("Player 1 tur")
+                        print("\nAI's turn")
                         player1 = True
                         player2 = False
             else:
@@ -326,17 +327,17 @@ class Kalaha(object):
 
                             if player1:
                                 if new_selection == 7:
-                                    print("Ektra tur til spiller 1")
+                                    print("The AI gets an extra turn")
 
                                 else:
-                                    print("Player 2 tur")
+                                    print("\nYour turn")
                                     player1 = False
                                     player2 = True
                             else:
                                 if new_selection == 0:
-                                    print("Ektra tur til spiller 2 ")
+                                    print("You get an extra turn")
                                 else:
-                                    print("Player 1 tur")
+                                    print("\nAI's turn")
                                     player1 = True
                                     player2 = False
 
