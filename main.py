@@ -10,14 +10,21 @@ import random
 class Kalaha(object):
 
     def printBoard(self, board):
-        print("-----------------")
-        print("  [6]    [5]   [4]    [3]   [2]   [1]")
-        print("  ", board[6], "   ", board[5], "   ", board[4], "   ", board[3], "   ", board[2], "   ", board[1])
-        print(board[7], "                                 ", board[0])
-        print("  ", board[8], "   ", board[9], "   ", board[10], "   ", board[11], "   ", board[12], "   ", board[13])
-        print("  [8]    [9]  [10]  [11]   [12]  [13]")
-        print("-----------------")
+       # print("-----------------")
+       # print("  [6]    [5]   [4]    [3]   [2]   [1]")
+      #  print("  ", board[6], "   ", board[5], "   ", board[4], "   ", board[3], "   ", board[2], "   ", board[1])
+      #  print(board[7], "                                 ", board[0])
+      #  print("  ", board[8], "   ", board[9], "   ", board[10], "   ", board[11], "   ", board[12], "   ", board[13])
+      #  print("  [8]    [9]  [10]  [11]   [12]  [13]")
+     #   print("-----------------")
 
+        print("-----------------")
+        print("  [13]   [12]   [11]  [10]  [9]  [8]")
+        print("  ", board[13], "   ", board[12], "   ", board[11], "   ", board[10], "   ", board[9], "   ", board[8])
+        print(board[0], "                                    ", board[7])
+        print("  ", board[1], "   ", board[2], "   ", board[3], "   ", board[4], "   ", board[5], "   ", board[6])
+        print("  [1]   [2]   [3]   [4]   [5]   [6]")
+        print("-----------------")
     def isWinner(self, board, kugler, winner):
         if board[0] + board[7] == kugler * 12:
             winner = True
