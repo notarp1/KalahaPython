@@ -8,7 +8,7 @@ import random
 
 
 class Kalaha(object):
-
+    kugler = 0
     def printBoard(self, board):
         print("-----------------")
         print("  [13]  [12]  [11]   [10]   [9]   [8]")
@@ -27,6 +27,40 @@ class Kalaha(object):
                 print("Tillykke spiller2")
             return winner
         return winner
+
+    def evalboardstate(self, boardstate, player1):
+        ispiller = 0
+        imodstander = 7
+        if (player1):
+            ispiller = 7
+            imodstander = 0
+        if boardstate[ispiller] > self.kugler / 2:
+            return self.kugler *12
+        if boardstate[imodstander] > self.kugler / 2:
+            return -1
+        return boardstate[ispiller]
+
+    def isGameDone(self,board,player1):
+        x1 = 8
+        x2 = 14
+        mx1 = 1
+        mx2 = 7
+        scoreindex = 0
+        if player1:
+            x1 = 1
+            x2 = 7
+            mx1 = 8
+            mx2 = 14
+            scoreindex = 7
+        for i in range(x1,x2):
+            if(board[i] != 0):
+                return board
+        for i in range(mx1,mx2):
+            board[scoreindex]+=board[i]
+            board[i] = 0
+        return board
+
+
 
     def evalmove(self, board, kugler, winner, limit, maxDepth):
 
@@ -58,7 +92,7 @@ class Kalaha(object):
     def minimax(self, dept, currnode, maximize, pointIdex):
         values = []
         if (not currnode.get_childen()):
-            return currnode.get_boardstate()[pointIdex]
+            return self.evalboardstate(currnode.get_boardstate(), pointIdex == 7)
 
         for n in currnode.get_childen():
             values.append(self.minimax(dept + 1, n, not maximize, pointIdex))
@@ -172,7 +206,8 @@ class Kalaha(object):
             boardPass[eval] += 1
 
             if i == value:
-
+                boardPass = self.isGameDone(boardPass, player1)
+                boardPass = self.isGameDone(boardPass, not player1)
                 if self.isWinner(boardPass, kugler, winner) == 0:
 
                     if new_selection == switch:
@@ -205,14 +240,16 @@ class Kalaha(object):
     def playGame(self):
         print("Vælg antal kugler")
         kugler = 6
+        self.kugler = kugler
         sum1 = 0
         sum2 = 0
         board = [sum1, kugler, kugler, kugler, kugler, kugler, kugler, sum2, kugler, kugler, kugler, kugler, kugler,
                  kugler]
 
+
         winner = False
-        player1 = True
-        player2 = False
+        player1 = False
+        player2 = True
 
         while not winner:
 
@@ -249,6 +286,7 @@ class Kalaha(object):
                 if player1:
                     if self.isWinner(board, kugler, winner):
                         winner = True
+
                     else:
                         print("Player 2 tur")
                         player1 = False
@@ -281,7 +319,8 @@ class Kalaha(object):
                     board[(new_selection + a) % 14] += 1
 
                     if i == value:
-
+                        board = self.isGameDone(board,player1)
+                        board = self.isGameDone(board, not player1)
                         if self.isWinner(board, kugler, winner) == 0:
 
                             if player1:
