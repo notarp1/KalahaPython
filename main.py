@@ -57,14 +57,14 @@ class Kalaha(object):
     #####ØHHHHHHHHHHHHH?????? mangler minimax implementation
     def minimax(self, dept, currnode, maximize, pointIdex):
         values = []
-        if (not currnode.get_childen()):
+        if not currnode.get_childen():
             return currnode.get_boardstate()[pointIdex]
 
         for n in currnode.get_childen():
             values.append(self.minimax(dept + 1, n, not maximize, pointIdex))
-        if (dept == 0):
+        if dept == 0:
             return values.index(max(values)) + 1
-        if (maximize == True):
+        if maximize == True:
             return max(values)
 
         return min(values)
@@ -169,8 +169,16 @@ class Kalaha(object):
                     a = a + 1
             eval = new_selection + a
             eval = eval % 14
-            boardPass[eval] += 1
 
+            if i == value:
+                if boardPass[eval] == 0:
+                    if eval != 0 | 7:
+                        self.steal_check(boardPass, eval, switch)
+
+
+
+
+            boardPass[eval] += 1
             if i == value:
 
                 if self.isWinner(boardPass, kugler, winner) == 0:
@@ -202,6 +210,63 @@ class Kalaha(object):
 
                     return path_complete
 
+    def steal_check(self, boardPass, eval, switch):
+        steal = 0
+        if switch == 7:
+
+            if eval == 1:
+                steal = boardPass[13]
+                boardPass[13] = 0
+                boardPass[7] += steal
+            if eval == 2:
+                steal = boardPass[12]
+                boardPass[12] = 0
+                boardPass[7] += steal
+            if eval == 3:
+                steal = boardPass[11]
+                boardPass[11] = 0
+                boardPass[7] += steal
+            if eval == 4:
+                steal = boardPass[10]
+                boardPass[10] = 0
+                boardPass[7] += steal
+            if eval == 5:
+                steal = boardPass[9]
+                boardPass[9] = 0
+                boardPass[7] += steal
+            if eval == 6:
+                steal = boardPass[8]
+                boardPass[8] = 0
+                boardPass[7] += steal
+
+
+        else:
+            if eval == 13:
+                steal = boardPass[1]
+                boardPass[1] = 0
+                boardPass[0] += steal
+            if eval == 12:
+                steal = boardPass[2]
+                boardPass[2] = 0
+                boardPass[0] += steal
+            if eval == 11:
+                steal = boardPass[3]
+                boardPass[3] = 0
+                boardPass[0] += steal
+            if eval == 10:
+                steal = boardPass[4]
+                boardPass[4] = 0
+                boardPass[0] += steal
+            if eval == 9:
+                steal = boardPass[5]
+                boardPass[5] = 0
+                boardPass[0] += steal
+            if eval == 8:
+                steal = boardPass[6]
+                boardPass[6] = 0
+                boardPass[0] += steal
+
+
     def playGame(self):
         print("Vælg antal kugler")
         kugler = int(input())
@@ -215,7 +280,6 @@ class Kalaha(object):
         player2 = True
 
         while not winner:
-
 
 
             selection = 0
@@ -267,6 +331,11 @@ class Kalaha(object):
                 value = int(board[selection])
                 board[selection] = 0
                 a = 0
+                if player1:
+                    switch = 7
+                else:
+                    switch = 0
+
                 for i in range(1, (value + 1)):
                     new_selection = selection + i
 
@@ -279,8 +348,15 @@ class Kalaha(object):
                     if player2:
                         if new_selection == 7:
                             a = a + 1
+                    eval = new_selection + a
+                    eval = eval % 14
 
-                    board[(new_selection + a) % 14] += 1
+                    if i == value:
+                        if board[eval] == 0:
+                            if eval != 0 | 7:
+                                self.steal_check(board, eval, switch)
+
+                    board[eval] += 1
 
                     if i == value:
 
