@@ -4,6 +4,7 @@ from functools import partial
 import json
 
 from node import node
+import random
 
 
 class Kalaha(object):
@@ -50,8 +51,7 @@ class Kalaha(object):
             first_node.appendChild(node(p[1], first_node, p[3]))
 
         node_final = self.depth_search(candidates, first_node, maxDepth, 1, kugler, limit, winner)
-        print("din mor")
-        print(first_node.get_childen()[0])
+        # print(first_node.get_childen()[0])
         return node_final
 
     #####ØHHHHHHHHHHHHH?????? mangler minimax implementation
@@ -63,7 +63,7 @@ class Kalaha(object):
         for n in currnode.get_childen():
             values.append(self.minimax(dept + 1, n, not maximize, pointIdex))
         if (dept == 0):
-            return values.index(max(values)) +1
+            return values.index(max(values)) + 1
         if (maximize == True):
             return max(values)
 
@@ -118,7 +118,8 @@ class Kalaha(object):
             length = len(p)
 
             if length < 2:
-                candidates.append(p[0])
+                if p:
+                    candidates.append(p[0])
             else:
                 j = -1
                 prev = None
@@ -167,9 +168,7 @@ class Kalaha(object):
                 if new_selection == 7:
                     a = a + 1
             eval = new_selection + a
-            while eval > 13:
-                if eval > 13:
-                    eval = eval - 14
+            eval = eval % 14
             boardPass[eval] += 1
 
             if i == value:
@@ -205,7 +204,7 @@ class Kalaha(object):
 
     def playGame(self):
         print("Vælg antal kugler")
-        kugler = int(input())
+        kugler = 6
         sum1 = 0
         sum2 = 0
         board = [sum1, kugler, kugler, kugler, kugler, kugler, kugler, sum2, kugler, kugler, kugler, kugler, kugler,
@@ -215,64 +214,105 @@ class Kalaha(object):
         player1 = True
         player2 = False
 
-        while winner == 0:
+        while not winner:
 
             self.printBoard(board)
 
-            selection = 0;
+            selection = 0
             if player1:
-                node1 = self.evalmove(board, kugler, winner, 0, 3)
-                index = self.minimax(0,node1, True,7)
-                i = 1
-                while(True):
-                    if(board[i] == 0):
-                        index+=1
-                    if(i==index):
-                        selection = i;
-                        print(selection)
-                        break
-                    i+= 1
+                if self.canMove(board, 0):
+                    node1 = self.evalmove(board, kugler, winner, 0, 6)
+                    index = self.minimax(0, node1, True, 7)
+                    i = 1
+                    while True:
+                        if board[i % 14] == 0:
+                            index += 1
+                        if i == index:
+                            selection = i
+                            print(selection)
+                            break
+                        i += 1
+                else:
+                    selection = -1
             if player2:
-                print("Vælg række")
-                selection = int(input())
-            value = int(board[selection])
-            board[selection] = 0
-            a = 0
-            for i in range(1, (value + 1)):
-                new_selection = selection + i
+                if self.canMove(board, 1):
+                    print("Vælg række")
+                    #selection = random.randint(8, 13)
+                    #while board[selection] == 0:
+                    #    selection = random.randint(8, 13)
+                    selection = int(input())
+                    print("selected ", selection)
+                else:
+                    selection = -1
 
-                if new_selection > 13:
-                    new_selection = new_selection - 14
-
+            if selection == -1:
                 if player1:
-                    if new_selection == 0:
-                        a = a + 1
-                if player2:
-                    if new_selection == 7:
-                        a = a + 1
+                    if self.isWinner(board, kugler, winner):
+                        winner = True
+                    else:
+                        print("Player 2 tur")
+                        player1 = False
+                        player2 = True
+                else:
+                    if self.isWinner(board, kugler, winner):
+                        winner = True
+                    else:
+                        print("Player 1 tur")
+                        player1 = True
+                        player2 = False
+            else:
+                selection = selection % 14
+                value = int(board[selection])
+                board[selection] = 0
+                a = 0
+                for i in range(1, (value + 1)):
+                    new_selection = selection + i
 
-                board[new_selection + a] += 1
+                    if new_selection > 13:
+                        new_selection = new_selection - 14
 
-                if i == value:
+                    if player1:
+                        if new_selection == 0:
+                            a = a + 1
+                    if player2:
+                        if new_selection == 7:
+                            a = a + 1
 
-                    if self.isWinner(board, kugler, winner) == 0:
+                    board[(new_selection + a) % 14] += 1
 
-                        if player1:
-                            if new_selection == 7:
-                                print("Ektra tur til spiller 1")
+                    if i == value:
 
+                        if self.isWinner(board, kugler, winner) == 0:
+
+                            if player1:
+                                if new_selection == 7:
+                                    print("Ektra tur til spiller 1")
+
+                                else:
+                                    print("Player 2 tur")
+                                    player1 = False
+                                    player2 = True
                             else:
-                                print("Player 2 tur")
-                                player1 = False
-                                player2 = True
-                        else:
-                            if new_selection == 0:
-                                print("Ektra tur til spiller 2 ")
-                            else:
-                                print("Player 1 tur")
-                                player1 = True
-                                player2 = False
+                                if new_selection == 0:
+                                    print("Ektra tur til spiller 2 ")
+                                else:
+                                    print("Player 1 tur")
+                                    player1 = True
+                                    player2 = False
+
+    def canMove(self, board, playerIndex):
+        if playerIndex == 0:
+            playerStart = 1
+            playerEnd = 7
+        else:
+            playerStart = 8
+            playerEnd = 14
+        for i in range(playerStart, playerEnd):
+            if not board[i] == 0:
+                return True
+        return False
 
 
-game = Kalaha()
-game.playGame()
+if __name__ == "__main__":
+    game = Kalaha()
+    game.playGame()
