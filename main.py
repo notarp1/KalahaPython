@@ -20,13 +20,8 @@ class Kalaha(object):
 
     def isWinner(self, board, kugler, winner):
         if board[0] + board[7] == kugler * 12:
-            winner = True
-            if board[0] < board[7]:
-                print("Tillykke spiller1")
-            else:
-                print("Tillykke spiller2")
-            return winner
-        return winner
+            return True
+        return False
 
     def evalboardstate(self, boardstate, player1):
         ispiller = 0
@@ -34,9 +29,9 @@ class Kalaha(object):
         if (player1):
             ispiller = 7
             imodstander = 0
-        if boardstate[ispiller] > self.kugler / 2:
+        if boardstate[ispiller] > (self.kugler*12) / 2:
             return self.kugler *12
-        if boardstate[imodstander] > self.kugler / 2:
+        if boardstate[imodstander] > (self.kugler*12) / 2:
             return -1
         return boardstate[ispiller]
 
@@ -59,7 +54,6 @@ class Kalaha(object):
             board[scoreindex]+=board[i]
             board[i] = 0
         return board
-
 
 
     def evalmove(self, board, kugler, winner, limit, maxDepth):
@@ -274,10 +268,11 @@ class Kalaha(object):
             if player2:
                 if self.canMove(board, 1):
                     print("Vælg række")
-                    #selection = random.randint(8, 13)
-                    #while board[selection] == 0:
-                    #    selection = random.randint(8, 13)
-                    selection = int(input())
+                    selection = random.randint(8, 13)
+                    while board[selection] == 0:
+                        selection = random.randint(8, 13)
+                   # selection = int(input())
+
                     print("selected ", selection)
                 else:
                     selection = -1
@@ -285,8 +280,11 @@ class Kalaha(object):
             if selection == -1:
                 if player1:
                     if self.isWinner(board, kugler, winner):
-                        winner = True
-
+                        if(board[0] > board[7]):
+                            print("Player 2 du har vundet")
+                        else:
+                            print("Player 1 du har vundet")
+                        break
                     else:
                         print("Player 2 tur")
                         player1 = False
