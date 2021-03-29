@@ -285,12 +285,12 @@ class Kalaha(object):
                  kugler]
 
         winner = False
-        player1 = False
-        player2 = True
+        player1 = True
+        player2 = False
 
         while not winner:
 
-
+            self.printBoard(board)
             selection = 0
             if player1:
                 if self.canMove(board, 0):
@@ -309,7 +309,7 @@ class Kalaha(object):
                     selection = -1
 
             if player2:
-                self.printBoard(board)
+
                 if self.canMove(board, 1):
                     print("Vælg række")
                          # Randome-test: In order to test the efficiency of the AI, we can try to compare it to a player that picks completly randome. 
