@@ -11,11 +11,11 @@ class Kalaha(object):
 
     def printBoard(self, board):
         print("-----------------")
-        print("  [13]  [12]  [11]   [10]   [9]   [8]")
-        print("  ", board[13], "   ", board[12], "   ", board[11], "   ", board[10], "   ", board[9], "   ", board[8])
-        print(board[0], "                                      ", board[7])
-        print("  ", board[1], "   ", board[2], "   ", board[3], "   ", board[4], "   ", board[5], "   ", board[6])
-        print("  [1]    [2]    [3]    [4]    [5]    [6]")
+        print("  [6]    [5]   [4]    [3]   [2]   [1]")
+        print("  ", board[6], "   ", board[5], "   ", board[4], "   ", board[3], "   ", board[2], "   ", board[1])
+        print(board[7], "                                 ", board[0])
+        print("  ", board[8], "   ", board[9], "   ", board[10], "   ", board[11], "   ", board[12], "   ", board[13])
+        print("  [8]    [9]  [10]  [11]   [12]  [13]")
         print("-----------------")
 
     def isWinner(self, board, kugler, winner):
@@ -204,19 +204,19 @@ class Kalaha(object):
 
     def playGame(self):
         print("Vælg antal kugler")
-        kugler = 6
+        kugler = int(input())
         sum1 = 0
         sum2 = 0
         board = [sum1, kugler, kugler, kugler, kugler, kugler, kugler, sum2, kugler, kugler, kugler, kugler, kugler,
                  kugler]
 
         winner = False
-        player1 = True
-        player2 = False
+        player1 = False
+        player2 = True
 
         while not winner:
 
-            self.printBoard(board)
+
 
             selection = 0
             if player1:
@@ -229,12 +229,14 @@ class Kalaha(object):
                             index += 1
                         if i == index:
                             selection = i
-                            print(selection)
+                            print("Selection: ", selection)
                             break
                         i += 1
                 else:
                     selection = -1
+
             if player2:
+                self.printBoard(board)
                 if self.canMove(board, 1):
                     print("Vælg række")
                     #selection = random.randint(8, 13)
