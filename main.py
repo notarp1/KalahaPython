@@ -268,10 +268,13 @@ class Kalaha(object):
             if player2:
                 if self.canMove(board, 1):
                     print("Vælg række")
-                    selection = random.randint(8, 13)
-                    while board[selection] == 0:
-                        selection = random.randint(8, 13)
-                   # selection = int(input())
+                    #selection = random.randint(8, 13)
+                    #while board[selection] == 0:
+                    #   selection = random.randint(8, 13)
+                    selection = int(input())
+                    while (8 > selection or selection > 13):
+                       print("Vælg række mellem 8-13")
+                       selection = int(input()) 
 
                     print("selected ", selection)
                 else:
