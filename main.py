@@ -1,11 +1,4 @@
-import copy
-from operator import is_not
-from functools import partial
-import json
-
 from node import node
-import random
-
 
 class Kalaha(object):
     kugler = 0
